@@ -36,79 +36,94 @@ web site</a>:
 ## Loading the data
 
 
+The following code is used in `plot1.R`, `plot2.R`, `plot3.R`, and `plot4.R` to download, load, and subset the data.
 
+<!-- -->
 
+	#download and extract file
+	url <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
+	download.file(url, destfile = "./household_power_consumption.zip")
+	unzip("household_power_consumption.zip")
 
-When loading the dataset into R, please consider the following:
+	#load first five rows to get the classes of the variables
+	top5 <- read.table("household_power_consumption.txt", header = TRUE, sep = ";", na.strings = "?", nrows = 5)
+	classes <- sapply(top5, class)
 
-* The dataset has 2,075,259 rows and 9 columns. First
-calculate a rough estimate of how much memory the dataset will require
-in memory before reading into R. Make sure your computer has enough
-memory (most modern computers should be fine).
+	#read the entire dataset
+	alldata <- read.table("household_power_consumption.txt", header = TRUE, sep = ";", na.strings = "?", colClasses = classes)
 
-* We will only be using data from the dates 2007-02-01 and
-2007-02-02. One alternative is to read the data from just those dates
-rather than reading in the entire dataset and subsetting to those
-dates.
+	#convert the date variable to a Date datatype
+	alldata$Date <- as.Date(alldata$Date, "%d/%m/%Y")
 
-* You may find it useful to convert the Date and Time variables to
-Date/Time classes in R using the `strptime()` and `as.Date()`
-functions.
+	#We will only be using data from the dates 2007-02-01 and 2007-02-02
+	subsetdata <- alldata[alldata$Date >= "2007-02-01" & alldata$Date <= "2007-02-02",]
 
-* Note that in this dataset missing values are coded as `?`.
+	#convert the time field to a datetime
+	subsetdata$Time <- as.POSIXct(paste(subsetdata$Date, strftime(strptime(subsetdata$Time, "%T"), "%T")), format = "%Y-%m-%d %T")
+	colnames(subsetdata)[2] <- "datetime"
 
 
 ## Making Plots
 
-Our overall goal here is simply to examine how household energy usage
-varies over a 2-day period in February, 2007. Your task is to
-reconstruct the following plots below, all of which were constructed
-using the base plotting system.
-
-First you will need to fork and clone the following GitHub repository:
-[https://github.com/rdpeng/ExData_Plotting1](https://github.com/rdpeng/ExData_Plotting1)
-
-
-For each plot you should
-
-* Construct the plot and save it to a PNG file with a width of 480
-pixels and a height of 480 pixels.
-
-* Name each of the plot files as `plot1.png`, `plot2.png`, etc.
-
-* Create a separate R code file (`plot1.R`, `plot2.R`, etc.) that
-constructs the corresponding plot, i.e. code in `plot1.R` constructs
-the `plot1.png` plot. Your code file **should include code for reading
-the data** so that the plot can be fully reproduced. You should also
-include the code that creates the PNG file.
-
-* Add the PNG file and R code file to your git repository
-
-When you are finished with the assignment, push your git repository to
-GitHub so that the GitHub version of your repository is up to
-date. There should be four PNG files and four R code files.
-
-
-The four plots that you will need to construct are shown below. 
-
-
 ### Plot 1
 
+The following code is used in `plot1.R` to create `plot1.png`
 
-![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
+<!-- -->
+
+	  #create the plot and save it
+	  png(filename = "plot1.png")
+	  hist(subsetdata$Global_active_power, col = "red", main = "Global Active Power", xlab = "Global Active Power (kilowatts)")
+	  dev.off()
+
+![plot1](plot1.png) 
 
 
 ### Plot 2
+The following code is used in `plot2.R` to create `plot2.png`
 
-![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3.png) 
+<!-- -->
+
+	#create the plot and save it
+	png(filename = "plot2.png")
+	with(subsetdata, plot(datetime, Global_active_power, type = "l", xlab = "", ylab = "Global Active Power (kilowatts)"))
+	dev.off()
+
+![plot2](plot2.png) 
 
 
 ### Plot 3
+The following code is used in `plot3.R` to create `plot3.png`
 
-![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
+<!-- -->
+
+	#create the plot and save it
+	png(filename = "plot3.png")
+	with(subsetdata, plot(datetime, Sub_metering_1, type = "l", xlab = "", ylab = "Energy sub metering"))
+	with(subsetdata, lines(datetime, Sub_metering_2, col = "red"))
+	with(subsetdata, lines(datetime, Sub_metering_3, col = "blue"))
+	legend("topright", lty = c(1,1,1), col = c("black", "red", "blue"), legend = c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"))
+	dev.off()
+	
+![plot3](plot3.png) 
 
 
 ### Plot 4
+The following code is used in `plot4.R` to create `plot4.png`
 
-![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
+<!-- -->
+
+	#create the plot and save it
+	png(filename = "plot4.png")
+	par(mfrow = c(2,2))
+	with(subsetdata, plot(datetime, Global_active_power, type = "l", xlab = "", ylab = "Global Active Power"))
+	with(subsetdata, plot(datetime, Voltage, type = "l"))
+	with(subsetdata, plot(datetime, Sub_metering_1, type = "l", xlab = "", ylab = "Energy sub metering"))
+	with(subsetdata, lines(datetime, Sub_metering_2, col = "red"))
+	with(subsetdata, lines(datetime, Sub_metering_3, col = "blue"))
+	legend("topright", bty = "n", cex=0.95, pt.cex=1, lty = c(1,1,1), col = c("black", "red", "blue"), legend = c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"))
+	with(subsetdata, plot(datetime, Global_reactive_power, type = "l", cex.lab = .95))
+	dev.off()
+
+![plot4](plot4.png) 
 
